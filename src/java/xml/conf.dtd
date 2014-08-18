@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT configuration (refresh_rate, movieprocessors)> 
+<!ELEMENT refresh_rate (#PCDATA)>
+<!ELEMENT movieprocessors (movieprocessor)>
+<!ELEMENT movieprocessor (name, class, options)>
+<!ELEMENT name (#PCDATA)>
+<!ELEMENT class (#PCDATA)>
+<!ELEMENT options (option*)>
+<!ELEMENT option (#PCDATA)>
+<!ATTLIST option name CDATA #REQUIRED>

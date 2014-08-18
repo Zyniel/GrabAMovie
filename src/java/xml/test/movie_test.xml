@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE order SYSTEM "../movie.dtd">
+<movie id="0000001">
+    <name>Movie 1</name>
+    <location>D:\</location>
+</movie>

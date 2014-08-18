@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ENTITY % movie SYSTEM "movie.dtd">
+%movie;
+<!ELEMENT order (owner?,movies)> 
+<!ATTLIST order id CDATA #REQUIRED>
+<!ELEMENT owner (#PCDATA)>
+<!ELEMENT movies (movie*)>

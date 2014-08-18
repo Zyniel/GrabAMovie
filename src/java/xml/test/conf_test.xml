@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration SYSTEM "../conf.dtd">
+<configuration>
+    <refresh_rate>1000</refresh_rate>
+    <movieprocessors>
+        <movieprocessor>
+            <name>HDDMovieProcessor</name>
+            <class>grabamovie.core.HDDMovieProcessor</class>
+            <options>
+                <option name="destination">D:\tmp3</option>
+            </options>
+        </movieprocessor>
+    </movieprocessors>
+</configuration>

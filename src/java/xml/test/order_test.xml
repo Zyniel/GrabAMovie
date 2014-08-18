@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE order SYSTEM "../order.dtd">
+<order id="0000001">
+    <owner>Owner 1</owner>
+    <movies>
+        <movie id="0000001">
+            <name>Movie 1</name>
+            <location>D:\</location>
+        </movie>
+        <movie id="0000002">
+            <name>Movie 2</name>
+            <location>E:\</location>
+        </movie>
+        <movie id="0000003">
+            <name>Movie 3</name>
+            <location>F:\</location>
+        </movie>
+    </movies>
+</order>
