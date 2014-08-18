@@ -40,7 +40,7 @@ public final class HDDMovieProcessor extends MovieProcessor {
 
     @Override
     protected void internalProcess(Movie movie, Order order) throws Exception{
-        LOG.info("Copying file ...");
+        LOG.info("Copying file: " + movie.getName());
         Path filepath = new File(movie.getLocation(), movie.getName()).toPath();
         Path destPath = new File(new File(this.destination.replace("\\", "\\\\"), order.getId()), movie.getName()).toPath();
         Files.copy(filepath, destPath, REPLACE_EXISTING);   
