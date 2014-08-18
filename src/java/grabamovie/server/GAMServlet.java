@@ -23,8 +23,9 @@ import javax.xml.transform.stream.StreamSource;
  * @author OCanada
  */
 public class GAMServlet extends HttpServlet {
+
     private static final Logger LOG = Logger.getLogger(GAMServlet.class.getName());
-    
+
     /**
      * Processes requests for both HTTP
      * <code>GET</code> and
@@ -37,38 +38,26 @@ public class GAMServlet extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
+        response.setContentType("text/xml;charset=UTF-8");
         PrintWriter out = response.getWriter();
         try {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Order has been sent</title>");            
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet NewServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-            
             // Get the order and try parsing
             String strOrder = request.getParameter("order");
             if (strOrder != null) {
                 StringBuffer strB = new StringBuffer(strOrder);
                 try {
-                    Order order = Order.parseXML(new StreamSource( new StringReader( strB.toString() ) )); 
+                    Order order = Order.parseXML(new StreamSource(new StringReader(strB.toString())));
                     if (!order.getIsProcessed()) {
-                        GAMEngine gam = (GAMEngine)getServletContext().getAttribute("GAMEngine");
+                        GAMEngine gam = (GAMEngine) getServletContext().getAttribute("GAMEngine");
                         gam.addOrder(order);
                     }
-                        
+                    strB.append(formatResponse(ResponseStatus.SUCCESS, null));
                 } catch (JAXBException ex) {
-                    LOG.log(Level.SEVERE, null, "Could not parse request as XML Order.");
                     LOG.log(Level.SEVERE, null, ex);
+                    strB.append(formatResponse(ResponseStatus.CRITICAL, ex.getMessage()));
                 }
             }
-            
-        } finally {            
+        } finally {
             out.close();
         }
     }
@@ -113,4 +102,29 @@ public class GAMServlet extends HttpServlet {
     public String getServletInfo() {
         return "GrabAMovie Servlet. Handles order issued by the front-end.";
     }// </editor-fold>
+
+    private enum ResponseStatus {
+        SUCCESS,
+        FAILURE,
+        CRITICAL
+    }
+
+    private String formatResponse(ResponseStatus resp, String message) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<response>");
+        sb.append("<status>");
+        switch (resp) {
+            case SUCCESS:   sb.append("0");;
+            case FAILURE:   sb.append("1");
+            case CRITICAL:  sb.append("2");
+            default:;
+        }
+        sb.append("</status>");
+        if (message == null || "".equals(message)) {
+        } else {
+            sb.append("<message>").append(message).append("</message>");
+        }
+        sb.append("</response>");
+        return sb.toString();
+    }
 }

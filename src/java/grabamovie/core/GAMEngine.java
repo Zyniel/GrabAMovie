@@ -36,15 +36,15 @@ public class GAMEngine implements Runnable {
         while (doRun) {
             try {
                 if (remainingOrders.size() > 0) {
-                    Order order = remainingOrders.get(0);
-                    LOG.log(Level.INFO, "Processing order: {0}", order.getId());
+                    Order currentOrder = remainingOrders.get(0);
+                    LOG.log(Level.INFO, "Processing order: {0}", currentOrder.getId());
                     
-                    // Loop through all movies from the order
-                    Iterator<Movie> iteMovies = order.getMovieList().iterator();
+                    // Loop through all movies from the currentOrder
+                    Iterator<Movie> iteMovies = currentOrder.getMovieList().iterator();
                     while (iteMovies.hasNext()) {
                         Movie currentMovie = (Movie) iteMovies.next();
                         try {
-                            movieProcessor.process(currentMovie);
+                            movieProcessor.process(currentMovie, currentOrder);
                         } catch (Exception e) {
                             LOG.log(Level.SEVERE, "Error processing movie: " + currentMovie.getName(), e);
                         }

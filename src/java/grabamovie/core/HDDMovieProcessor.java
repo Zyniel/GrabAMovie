@@ -5,6 +5,7 @@
 package grabamovie.core;
 
 import java.io.File;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardCopyOption.*;
@@ -38,26 +39,29 @@ public final class HDDMovieProcessor extends MovieProcessor {
     }
 
     @Override
-    protected void internalProcess(Movie movie) throws Exception{
+    protected void internalProcess(Movie movie, Order order) throws Exception{
         LOG.info("Copying file ...");
         Path filepath = new File(movie.getLocation(), movie.getName()).toPath();
-        Path destPath = new File(this.destination.replace("\\", "\\\\"), movie.getName()).toPath();
+        Path destPath = new File(new File(this.destination.replace("\\", "\\\\"), order.getId()), movie.getName()).toPath();
         Files.copy(filepath, destPath, REPLACE_EXISTING);   
         LOG.info("Done");
     }
 
     @Override
-    protected void postProcess(Movie movie) throws Exception{
+    protected void postProcess(Movie movie, Order order) throws Exception{
         LOG.info("Post-processing");
     }
 
     @Override
-    protected void preProcess(Movie movie) throws Exception{
-        LOG.info("Pre-processing");
+    protected void preProcess(Movie movie, Order order) throws Exception{
+        try {
+            Files.createDirectory(new File(this.destination.replace("\\", "\\\\"),order.getId()).toPath());
+            LOG.info("Created Order Folder");
+        } catch (FileAlreadyExistsException faee) {}
     }
 
     @Override
-    protected void errorProcess(Movie movie, Exception e) throws Exception{
+    protected void errorProcess(Movie movie, Order order, Exception e) throws Exception{
         throw e;
     }
 }
