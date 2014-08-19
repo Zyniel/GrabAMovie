@@ -26,6 +26,14 @@ public abstract class MovieProcessor implements IMovieProcessor{
         }
     }
     
+    public String getProcessorName() {
+        return processorName;
+    }
+
+    public void setProcessorName(String processorName) {
+        this.processorName = processorName;
+    }    
+    
     /**
      * Main processing routine. Every action to handle movie should be done here.
      * @param movie Currently processed movie.

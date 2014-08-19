@@ -37,7 +37,7 @@ public final class HDDMovieProcessor extends MovieProcessor {
             throw new Exception("Movie Processor physical destination can not be empty.");
         }
     }
-
+    
     @Override
     protected void internalProcess(Movie movie, Order order) throws Exception{
         LOG.info("Copying file: " + movie.getName());

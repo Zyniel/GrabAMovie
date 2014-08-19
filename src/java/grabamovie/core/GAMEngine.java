@@ -33,6 +33,10 @@ public class GAMEngine implements Runnable {
 
     @Override
     public void run() {
+        if (movieProcessor == null || "".equals(movieProcessor.getProcessorName()) ) {
+            LOG.log(Level.SEVERE, "Movie Processor not initialized properly.");
+            return;
+        }
         while (doRun) {
             try {
                 if (remainingOrders.size() > 0) {
