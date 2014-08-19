@@ -3,6 +3,8 @@ package grabamovie.core;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,14 +14,14 @@ import java.util.logging.Logger;
  */
 public class GAMEngine implements Runnable {
 
-    private List<Order> remainingOrders;
+    private LinkedBlockingQueue<Order> remainingOrders;
     private MovieProcessor movieProcessor;
     private Boolean doRun = false;
     private Thread t;
     private static final Logger LOG = Logger.getLogger(GAMEngine.class.getName());
 
     public GAMEngine(MovieProcessor movieProcessor) {
-        remainingOrders = new ArrayList<Order>();
+        remainingOrders = new  LinkedBlockingQueue<Order>();
         this.movieProcessor = movieProcessor;
     }
 
@@ -38,9 +40,10 @@ public class GAMEngine implements Runnable {
             return;
         }
         while (doRun) {
+            Order currentOrder = null;
             try {
-                if (remainingOrders.size() > 0) {
-                    Order currentOrder = remainingOrders.get(0);
+                currentOrder = remainingOrders.poll();
+                if (currentOrder != null) {
                     LOG.log(Level.INFO, "Processing order: {0}", currentOrder.getId());
                     
                     // Loop through all movies from the currentOrder
@@ -53,11 +56,13 @@ public class GAMEngine implements Runnable {
                             LOG.log(Level.SEVERE, "Error processing movie: " + currentMovie.getName(), e);
                         }
                     }
-                    remainingOrders.remove(0);
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, "An error occured while processing orders.", ex);
+                if (currentOrder != null) {
+                    Boolean setRetry = remainingOrders.offer(currentOrder);
+                }
             }
         }
     }

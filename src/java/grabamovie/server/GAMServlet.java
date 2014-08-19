@@ -40,13 +40,12 @@ public class GAMServlet extends HttpServlet {
             // Get the order and try parsing
             String strOrder = request.getParameter("order");
             if (strOrder != null) {
-                StringBuffer strB = new StringBuffer(strOrder);
+                StringBuilder strB = new StringBuilder(strOrder);
                 try {
                     Order order = Order.parseXML(new StreamSource(new StringReader(strB.toString())));
-                    if (!order.getIsProcessed()) {
-                        GAMEngine gam = (GAMEngine) getServletContext().getAttribute("GAMEngine");
-                        gam.addOrder(order);
-                    }
+                    GAMEngine gam = (GAMEngine) getServletContext().getAttribute("GAMEngine");
+                    gam.addOrder(order);
+                    
                     strB.append(formatResponse(ResponseStatus.SUCCESS, null));
                 } catch (JAXBException ex) {
                     LOG.log(Level.SEVERE, null, ex);

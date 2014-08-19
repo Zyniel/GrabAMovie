@@ -1,5 +1,6 @@
 package grabamovie.core;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
@@ -22,7 +23,9 @@ import javax.xml.transform.Source;
  */
 @XmlRootElement(name = "order")
 @XmlAccessorType(XmlAccessType.NONE)
-public class Order {
+public final class Order {
+    private static final Logger LOG = Logger.getLogger(Order.class.getName());
+    
     @XmlAttribute(name="id")
     private String id;
     @XmlElement(name="owner")
@@ -30,18 +33,29 @@ public class Order {
 
     @XmlElement(name = "movie")
     @XmlElementWrapper( name="movies" )
-    private List<Movie> movieList = null;
-    private Boolean isProcessed;
-    private static final Logger LOG = Logger.getLogger(Order.class.getName());
-
+    private List<Movie> movieList;   //TODO: Passer en thread safe
+    private OrderStatus status;
+   
+    /**
+     * States the progression of the order's preparation
+     */
+    public enum OrderStatus {
+        PREPARED,
+        PARTIAL,
+        CANCELLED,
+        UNHANDLED
+    }
+    
     /**
      * Empty constructor for JAXB
      */
     public Order() {
-        this.isProcessed = false;
+        this.status = OrderStatus.UNHANDLED;
+        this.movieList = new ArrayList<Movie>();
     }
 
     public Order(String id, String owner, List<Movie> movieList) throws Exception {
+        this();
         // Checks on ownername
         setId(id);
 
@@ -49,7 +63,6 @@ public class Order {
         this.owner = owner;
         // No checks on movie list (Can be empty)
         this.movieList = movieList;
-        this.isProcessed = false;
     }
 
     public String getId() {
@@ -64,8 +77,8 @@ public class Order {
         return movieList;
     }
 
-    public Boolean getIsProcessed() {
-        return isProcessed;
+    public OrderStatus getStatus() {
+        return status;
     }
 
     public void setId(String id) throws Exception {
@@ -84,6 +97,12 @@ public class Order {
         this.movieList = movieList;
     }
 
+    /**
+     * Parses and XML source into an Order instance
+     * @param source Source of the XML
+     * @return Order instance
+     * @throws JAXBException 
+     */
     public static Order parseXML(Source source) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Order.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
