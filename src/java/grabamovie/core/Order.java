@@ -1,5 +1,6 @@
 package grabamovie.core;
 
+import static grabamovie.core.Order.MaxTries;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,38 +27,54 @@ import javax.xml.transform.Source;
 @XmlRootElement(name = "order")
 @XmlAccessorType(XmlAccessType.NONE)
 public final class Order {
-    private static final Logger LOG = Logger.getLogger(Order.class.getName());
-    /** Maximum number of tries allowed to process an Order */
-    protected static final int MaxTries = 3;
-    
-    @XmlAttribute(name="id")
-    /** Order technical identifier */
-    private String id;
-    @XmlElement(name="owner")
-    /** Order optional owner name */
-    private String owner;
 
+    private static final Logger LOG = Logger.getLogger(Order.class.getName());
+    /**
+     * Maximum number of tries allowed to process an Order
+     */
+    protected static final int MaxTries = 3;
+    @XmlAttribute(name = "id")
+    /**
+     * Order technical identifier
+     */
+    private String id;
+    @XmlElement(name = "owner")
+    /**
+     * Order optional owner name
+     */
+    private String owner;
     @XmlElement(name = "movie")
-    @XmlElementWrapper( name="movies" )
+    @XmlElementWrapper(name = "movies")
     private List<Movie> movieList;
-    /** Current order completion status */
+    
+    private List<Movie> processedMovieList;
+    private List<Movie> unprocessedMovieList;
+    /**
+     * Current order completion status
+     */
     private OrderStatus status;
-    /** Number of retries done for the current order */
+    /**
+     * Number of retries done for the current order
+     */
     private int tries = 0;
-    /** Number of errors during current try */
+    /**
+     * Number of errors during current try
+     */
     private int errors = 0;
-   
+
     /**
      * States the progression of the order's preparation
      */
     public enum OrderStatus {
+
         PREPARED,
         PREPARED_PARTIAL,
         CANCELLED,
+        RETRIABLE,
         PROCESSING,
         UNHANDLED
     }
-    
+
     /**
      * Empty constructor for JAXB
      */
@@ -68,6 +85,7 @@ public final class Order {
 
     /**
      * Main constructor
+     *
      * @param id Compulsory technical identifier
      * @param owner Order optional owner name
      * @param movieList List movies contained in the Order
@@ -118,9 +136,10 @@ public final class Order {
 
     /**
      * Parses and XML source into an Order instance
+     *
      * @param source Source of the XML
      * @return Order instance
-     * @throws JAXBException 
+     * @throws JAXBException
      */
     public static Order parseXML(Source source) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(Order.class);
@@ -128,34 +147,58 @@ public final class Order {
         Order order = (Order) jaxbUnmarshaller.unmarshal(source);
         return order;
     }
-    
-    public void process (IMovieProcessor movieProcessor) {
-        errors = 0;
-        // Loop through all movies from the currentOrder
-        Iterator<Movie> iteMovies = movieList.iterator();
-        while (iteMovies.hasNext()) {
-            Movie currentMovie = (Movie) iteMovies.next();
-            try {
-                movieProcessor.process(currentMovie, this);
-            } catch (Exception e) {
-                LOG.log(Level.SEVERE, "Error processing movie: " + currentMovie.getName(), e);
+
+    public void process(IMovieProcessor movieProcessor) throws OrderMaxTriesReachedException, OrderProcessingException {
+        do {
+            // Check Order Status
+            if (this.status == OrderStatus.CANCELLED) 
+                throw new OrderProcessingException("Cannot process order. Order has been cancelled.");
+            else if (this.status == OrderStatus.PREPARED || this.status == OrderStatus.PREPARED_PARTIAL) 
+                throw new OrderProcessingException("Cannot process order. Order has already been processed.");
+            
+            // Check Retries Status
+            if (++this.tries > MaxTries)
+                throw new OrderMaxTriesReachedException();
+            
+            errors = 0;
+            // Loop through all movies from the currentOrder
+            Iterator<Movie> iteMovies = movieList.iterator();
+            while (iteMovies.hasNext()) {
+                Movie currentMovie = (Movie) iteMovies.next();
+                try {
+                    movieProcessor.process(currentMovie, this);
+                    processedMovieList.add(currentMovie);
+                } catch (Exception e) {
+                    LOG.log(Level.SEVERE, "Error processing movie: " + currentMovie.getName(), e);
+                    unprocessedMovieList.add(currentMovie);
+                    errors++;
+                }
             }
-        }
+            if (errors > 0) {
+                this.status = OrderStatus.PREPARED_PARTIAL;
+            } else {
+                this.status = OrderStatus.PREPARED;
+            }
+        } while (this.tries <= MaxTries);
     }
-    
-    public boolean isCancelled () {
+
+    public boolean isCancelled() {
         return (this.status == OrderStatus.CANCELLED);
     }
-    
-    public boolean isOnPrepatation () {
+
+    public boolean isOnPrepatation() {
         return (this.status == OrderStatus.PROCESSING);
-    }   
-    
-    public boolean isUnhandled () {
+    }
+
+    public boolean isUnhandled() {
         return (this.status == OrderStatus.UNHANDLED);
-    }    
-        
-    public boolean isPrepared () {
+    }
+
+    public boolean isRetriable() {
+        return (this.status == OrderStatus.RETRIABLE);
+    }
+
+    public boolean isPrepared() {
         return (this.status == OrderStatus.PREPARED || this.status == OrderStatus.PREPARED_PARTIAL);
-    }    
+    }
 }
