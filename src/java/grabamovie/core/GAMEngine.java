@@ -38,7 +38,7 @@ public class GAMEngine implements Runnable {
     @Override
     public void run() {
         if (movieProcessor == null || "".equals(movieProcessor.getProcessorName()) ) {
-            LOG.log(Level.SEVERE, "Movie Processor not initialized properly.");
+            LOG.log(Level.SEVERE, "Movie Processor has not been properly initialized.");
             return;
         }
         while (doRun) {
@@ -61,7 +61,7 @@ public class GAMEngine implements Runnable {
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, "An error occured while processing orders.", ex);
             }
         }
     }
