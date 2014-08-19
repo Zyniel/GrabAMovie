@@ -22,15 +22,23 @@ public class GAMEngine implements Runnable {
     private Thread t;
     private static final Logger LOG = Logger.getLogger(GAMEngine.class.getName());
 
-    public GAMEngine() {
+    public GAMEngine(MovieProcessor movieProcessor) {
         try {
             remainingOrders = new ArrayList<Order>();
-            movieProcessor = new HDDMovieProcessor("D:\\tmp3");
+            this.movieProcessor = movieProcessor;
         } catch (Exception e) {
             LOG.log(Level.SEVERE, null, e);
         }
     }
 
+    public MovieProcessor getMovieProcessor() {
+        return movieProcessor;
+    }
+
+    public void setMovieProcessor(MovieProcessor movieProcessor) {
+        this.movieProcessor = movieProcessor;
+    }
+    
     @Override
     public void run() {
         if (movieProcessor == null || "".equals(movieProcessor.getProcessorName()) ) {
