@@ -19,12 +19,8 @@ public class GAMEngine implements Runnable {
     private static final Logger LOG = Logger.getLogger(GAMEngine.class.getName());
 
     public GAMEngine(MovieProcessor movieProcessor) {
-        try {
-            remainingOrders = new ArrayList<Order>();
-            this.movieProcessor = movieProcessor;
-        } catch (Exception e) {
-            LOG.log(Level.SEVERE, null, e);
-        }
+        remainingOrders = new ArrayList<Order>();
+        this.movieProcessor = movieProcessor;
     }
 
     public MovieProcessor getMovieProcessor() {
