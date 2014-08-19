@@ -1,7 +1,9 @@
 package grabamovie.core;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -42,14 +44,17 @@ public final class Order {
     private OrderStatus status;
     /** Number of retries done for the current order */
     private int tries = 0;
+    /** Number of errors during current try */
+    private int errors = 0;
    
     /**
      * States the progression of the order's preparation
      */
     public enum OrderStatus {
         PREPARED,
-        PARTIAL,
+        PREPARED_PARTIAL,
         CANCELLED,
+        PROCESSING,
         UNHANDLED
     }
     
@@ -123,4 +128,34 @@ public final class Order {
         Order order = (Order) jaxbUnmarshaller.unmarshal(source);
         return order;
     }
+    
+    public void process (IMovieProcessor movieProcessor) {
+        errors = 0;
+        // Loop through all movies from the currentOrder
+        Iterator<Movie> iteMovies = movieList.iterator();
+        while (iteMovies.hasNext()) {
+            Movie currentMovie = (Movie) iteMovies.next();
+            try {
+                movieProcessor.process(currentMovie, this);
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "Error processing movie: " + currentMovie.getName(), e);
+            }
+        }
+    }
+    
+    public boolean isCancelled () {
+        return (this.status == OrderStatus.CANCELLED);
+    }
+    
+    public boolean isOnPrepatation () {
+        return (this.status == OrderStatus.PROCESSING);
+    }   
+    
+    public boolean isUnhandled () {
+        return (this.status == OrderStatus.UNHANDLED);
+    }    
+        
+    public boolean isPrepared () {
+        return (this.status == OrderStatus.PREPARED || this.status == OrderStatus.PREPARED_PARTIAL);
+    }    
 }

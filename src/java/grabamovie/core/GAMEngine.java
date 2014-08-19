@@ -16,7 +16,7 @@ public class GAMEngine implements Runnable {
 
     private LinkedBlockingQueue<Order> remainingOrders;
     private MovieProcessor movieProcessor;
-    private Boolean doRun = false;
+    private boolean doRun = false;
     private Thread t;
     private static final Logger LOG = Logger.getLogger(GAMEngine.class.getName());
 
@@ -46,16 +46,7 @@ public class GAMEngine implements Runnable {
                 if (currentOrder != null) {
                     LOG.log(Level.INFO, "Processing order: {0}", currentOrder.getId());
                     
-                    // Loop through all movies from the currentOrder
-                    Iterator<Movie> iteMovies = currentOrder.getMovieList().iterator();
-                    while (iteMovies.hasNext()) {
-                        Movie currentMovie = (Movie) iteMovies.next();
-                        try {
-                            movieProcessor.process(currentMovie, currentOrder);
-                        } catch (Exception e) {
-                            LOG.log(Level.SEVERE, "Error processing movie: " + currentMovie.getName(), e);
-                        }
-                    }
+
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
@@ -63,7 +54,7 @@ public class GAMEngine implements Runnable {
                 // TODO: Implement max retries
                 // Retry order processing later
                 if (currentOrder != null) {
-                    Boolean setRetry = remainingOrders.offer(currentOrder);
+                    boolean setRetry = remainingOrders.offer(currentOrder);
                 }
             }
         }
