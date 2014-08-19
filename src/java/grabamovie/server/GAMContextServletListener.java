@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package grabamovie.server;
 
 import grabamovie.core.GAMEngine;
@@ -32,13 +28,13 @@ public class GAMContextServletListener implements ServletContextListener {
         // Démarrer le processus
         HDDMovieProcessor hddprocessor;
         try {
-            
-            hddprocessor = new HDDMovieProcessor("D:\\tmmp3");
+            //TODO: Insert loading processor and configuration from file
+            hddprocessor = new HDDMovieProcessor("D:\\tmp3");
             gam = new GAMEngine(hddprocessor);
-            gam.start();      
+            gam.start();    
+            
             // Register GAMEngine as Context attribute
             ctx.setAttribute("GAMEngine", gam);   
-            
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, "Could not initialize GAMEngine.", ex);
         }
