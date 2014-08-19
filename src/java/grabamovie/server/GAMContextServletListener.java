@@ -5,6 +5,7 @@
 package grabamovie.server;
 
 import grabamovie.core.GAMEngine;
+import grabamovie.core.HDDMovieProcessor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
@@ -27,12 +28,20 @@ public class GAMContextServletListener implements ServletContextListener {
         ServletContext ctx = sce.getServletContext();
         
         LOG.log(Level.INFO,"GAM Servlet Initialized");
-        // Démarrer le processus
-        gam = new GAMEngine();
-        gam.start();
         
-        // Register GAMEngine as Context attribute
-        ctx.setAttribute("GAMEngine", gam);
+        // Démarrer le processus
+        HDDMovieProcessor hddprocessor;
+        try {
+            
+            hddprocessor = new HDDMovieProcessor("D:\\tmmp3");
+            gam = new GAMEngine(hddprocessor);
+            gam.start();      
+            // Register GAMEngine as Context attribute
+            ctx.setAttribute("GAMEngine", gam);   
+            
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Could not initialize GAMEngine.", ex);
+        }
    }
 
     @Override
