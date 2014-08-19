@@ -25,16 +25,23 @@ import javax.xml.transform.Source;
 @XmlAccessorType(XmlAccessType.NONE)
 public final class Order {
     private static final Logger LOG = Logger.getLogger(Order.class.getName());
+    /** Maximum number of tries allowed to process an Order */
+    protected static final int MaxTries = 3;
     
     @XmlAttribute(name="id")
+    /** Order technical identifier */
     private String id;
     @XmlElement(name="owner")
+    /** Order optional owner name */
     private String owner;
 
     @XmlElement(name = "movie")
     @XmlElementWrapper( name="movies" )
-    private List<Movie> movieList;   //TODO: Passer en thread safe
+    private List<Movie> movieList;
+    /** Current order completion status */
     private OrderStatus status;
+    /** Number of retries done for the current order */
+    private int tries = 0;
    
     /**
      * States the progression of the order's preparation
@@ -54,6 +61,13 @@ public final class Order {
         this.movieList = new ArrayList<Movie>();
     }
 
+    /**
+     * Main constructor
+     * @param id Compulsory technical identifier
+     * @param owner Order optional owner name
+     * @param movieList List movies contained in the Order
+     * @throws Exception Exceptions regarding Id
+     */
     public Order(String id, String owner, List<Movie> movieList) throws Exception {
         this();
         // Checks on ownername

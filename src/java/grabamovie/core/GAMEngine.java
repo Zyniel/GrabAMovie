@@ -60,6 +60,8 @@ public class GAMEngine implements Runnable {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, "An error occured while processing orders.", ex);
+                // TODO: Implement max retries
+                // Retry order processing later
                 if (currentOrder != null) {
                     Boolean setRetry = remainingOrders.offer(currentOrder);
                 }
