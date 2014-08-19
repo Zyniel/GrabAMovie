@@ -32,7 +32,7 @@ public final class Order {
     /**
      * Maximum number of tries allowed to process an Order
      */
-    protected static final int MaxTries = 3;
+    protected static final int MaxTries = 1;
     @XmlAttribute(name = "id")
     /**
      * Order technical identifier
