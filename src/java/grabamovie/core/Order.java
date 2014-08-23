@@ -149,6 +149,7 @@ public final class Order {
     }
 
     public void process(IMovieProcessor movieProcessor) throws OrderMaxTriesReachedException, OrderProcessingException {
+        boolean done = false;
         do {
             // Check Order Status
             if (this.status == OrderStatus.CANCELLED) 
@@ -201,4 +202,6 @@ public final class Order {
     public boolean isPrepared() {
         return (this.status == OrderStatus.PREPARED || this.status == OrderStatus.PREPARED_PARTIAL);
     }
+    
+    
 }

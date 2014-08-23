@@ -1,9 +1,5 @@
 package grabamovie.core;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,9 +16,8 @@ public class GAMEngine implements Runnable {
     private Thread t;
     private static final Logger LOG = Logger.getLogger(GAMEngine.class.getName());
 
-    public GAMEngine(MovieProcessor movieProcessor) {
-        remainingOrders = new  LinkedBlockingQueue<Order>();
-        this.movieProcessor = movieProcessor;
+    public GAMEngine() {
+        remainingOrders = new LinkedBlockingQueue<Order>();
     }
 
     public MovieProcessor getMovieProcessor() {
@@ -32,10 +27,10 @@ public class GAMEngine implements Runnable {
     public void setMovieProcessor(MovieProcessor movieProcessor) {
         this.movieProcessor = movieProcessor;
     }
-    
+
     @Override
     public void run() {
-        if (movieProcessor == null || "".equals(movieProcessor.getProcessorName()) ) {
+        if (movieProcessor == null || "".equals(movieProcessor.getProcessorName())) {
             LOG.log(Level.SEVERE, "Movie Processor has not been properly initialized.");
             return;
         }
@@ -45,17 +40,10 @@ public class GAMEngine implements Runnable {
                 currentOrder = remainingOrders.poll();
                 if (currentOrder != null) {
                     LOG.log(Level.INFO, "Processing order: {0}", currentOrder.getId());
-                    
-
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, "An error occured while processing orders.", ex);
-                // TODO: Implement max retries
-                // Retry order processing later
-                if (currentOrder != null) {
-                    boolean setRetry = remainingOrders.offer(currentOrder);
-                }
             }
         }
     }
@@ -73,9 +61,10 @@ public class GAMEngine implements Runnable {
             t.start();
         }
     }
-    
+
     public void addOrder(Order order) {
-        if (!remainingOrders.contains(order))
+        if (!remainingOrders.contains(order)) {
             remainingOrders.add(order);
+        }
     }
 }

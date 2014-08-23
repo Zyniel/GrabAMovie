@@ -13,6 +13,7 @@ import java.util.logging.Logger;
  */
 public final class HDDMovieProcessor extends MovieProcessor {
     private static final Logger LOG = Logger.getLogger(HDDMovieProcessor.class.getName());
+    private GAMEngine gam;
     
     private String destination;
     

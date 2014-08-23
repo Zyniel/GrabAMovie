@@ -29,8 +29,8 @@ public class GAMContextServletListener implements ServletContextListener {
         HDDMovieProcessor hddprocessor;
         try {
             //TODO: Insert loading processor and configuration from file
+            gam = new GAMEngine();
             hddprocessor = new HDDMovieProcessor("D:\\tmp3");
-            gam = new GAMEngine(hddprocessor);
             gam.start();    
             
             // Register GAMEngine as Context attribute
