@@ -10,8 +10,11 @@ public final class LogFormatter {
     public static Logger getLogger(String className) {
         Logger LOG =  Logger.getLogger(className);
         
+        // Simple Log only
+        LOG.setUseParentHandlers(false);
+        
         Handler consoleHandler = new ConsoleHandler();
-        Formatter fmt = new LogCustomFormatter();
+        Formatter fmt = new LogSimpleCustomFormatter();
         consoleHandler.setFormatter(fmt);
         
         LOG.addHandler(consoleHandler);

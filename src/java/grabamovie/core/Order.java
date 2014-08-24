@@ -61,7 +61,7 @@ public abstract class Order implements IOrder, Comparable {
      * Empty constructor for JAXB
      */
     public Order() {
-        this.status = OrderStatus.UNHANDLED;
+        this.status = OrderStatus.PENDING;
         this.processedItemList = new ArrayList<IOrderable>();
         this.unprocessedItemList = new ArrayList<IOrderable>();
     }
@@ -207,12 +207,8 @@ public abstract class Order implements IOrder, Comparable {
         return (this.status == OrderStatus.PROCESSING);
     }
 
-    public boolean isUnhandled() {
-        return (this.status == OrderStatus.UNHANDLED);
-    }
-
-    public boolean isRetriable() {
-        return (this.status == OrderStatus.RETRIABLE);
+    public boolean isPending() {
+        return (this.status == OrderStatus.PENDING);
     }
 
     public boolean isPrepared() {

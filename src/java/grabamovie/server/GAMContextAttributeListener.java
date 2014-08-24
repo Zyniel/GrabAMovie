@@ -13,17 +13,17 @@ public class GAMContextAttributeListener implements ServletContextAttributeListe
     
     @Override
     public void attributeAdded(ServletContextAttributeEvent servletContextAttributeEvent) {
-    	LOG.log(Level.INFO, "ServletContext attribute added::'{'{0},{1}'}'", new Object[]{servletContextAttributeEvent.getName(), servletContextAttributeEvent.getValue()});
+    	LOG.log(Level.FINEST, "ServletContext attribute added::'{'{0},{1}'}'", new Object[]{servletContextAttributeEvent.getName(), servletContextAttributeEvent.getValue()});
     }
 
     @Override
     public void attributeReplaced(ServletContextAttributeEvent servletContextAttributeEvent) {
-    	LOG.log(Level.INFO, "ServletContext attribute replaced::'{'{0},{1}'}'", new Object[]{servletContextAttributeEvent.getName(), servletContextAttributeEvent.getValue()});
+    	LOG.log(Level.FINEST, "ServletContext attribute replaced::'{'{0},{1}'}'", new Object[]{servletContextAttributeEvent.getName(), servletContextAttributeEvent.getValue()});
     }
 
     @Override
     public void attributeRemoved(ServletContextAttributeEvent servletContextAttributeEvent) {
-    	LOG.log(Level.INFO, "ServletContext attribute removed::'{'{0},{1}'}'", new Object[]{servletContextAttributeEvent.getName(), servletContextAttributeEvent.getValue()});
+    	LOG.log(Level.FINEST, "ServletContext attribute removed::'{'{0},{1}'}'", new Object[]{servletContextAttributeEvent.getName(), servletContextAttributeEvent.getValue()});
     }
 	
 }

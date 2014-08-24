@@ -48,4 +48,7 @@ public class GAMContextServletListener implements ServletContextListener {
         LOG.log(Level.INFO,"GAM Servlet Destroyed");
         gam.stop();
     }
+    
+    
+    
 }

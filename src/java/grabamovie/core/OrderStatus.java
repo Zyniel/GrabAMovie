@@ -8,10 +8,20 @@ package grabamovie.core;
  * States the progression of the order's preparation
  */
 public enum OrderStatus {
-    PREPARED,
-    PREPARED_PARTIAL,
-    CANCELLED,
-    RETRIABLE,
-    PROCESSING,
-    UNHANDLED
+
+    PREPARED("Fully Prepared: All items are processed."),
+    PREPARED_PARTIAL("Partially Prepared: Some items are missing."),
+    CANCELLED("Cancelled"),
+    PROCESSING("In Process..."),
+    PENDING("Pending...");
+    
+    private final String desc;
+
+    private OrderStatus(String desc) {
+        this.desc = desc;
+    }
+
+    public String getDescription() {
+        return desc;
+    }
 }
