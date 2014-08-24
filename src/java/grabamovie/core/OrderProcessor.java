@@ -61,14 +61,14 @@ public class OrderProcessor implements Runnable {
                 if (currentOrder != null) {
                     LOG.log(Level.INFO, "Processing order: {0}", currentOrder.getId());
                     currentOrder.process(itemProcessor);
-                    LOG.log(Level.INFO, "Ordered status: " + currentOrder.getStatus().getDescription());
+                    LOG.log(Level.INFO, "Ordered status: {0}", currentOrder.getStatus().getDescription());
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, "An critical error occured in program.", ex);
             } catch (OrderProcessingException ex) {
                 LOG.log(Level.SEVERE, "An error occured while processing orders.", ex);
-                LOG.log(Level.INFO, "Ordered status: " + currentOrder.getStatus().getDescription());
+                LOG.log(Level.INFO, "Ordered status: {0}", currentOrder.getStatus().getDescription());
             }
         }
     }
