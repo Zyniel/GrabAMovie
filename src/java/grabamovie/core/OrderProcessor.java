@@ -2,6 +2,7 @@ package grabamovie.core;
 
 import grabamovie.utils.LogFormatter;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,9 +16,11 @@ public class OrderProcessor implements Runnable {
     private IOrderableProcessor itemProcessor;
     private boolean doRun = false;
     private Thread t;
+    private ScheduledExecutorService service;
     private static final Logger LOG = LogFormatter.getLogger(OrderProcessor.class.getName());
-
-    public OrderProcessor() {
+    
+    public OrderProcessor(ScheduledExecutorService service) {
+        this.service = service;
         remainingOrders = new LinkedBlockingQueue<IOrder>();
     }
 
@@ -37,6 +40,7 @@ public class OrderProcessor implements Runnable {
     public void stop() {
         if (doRun) {
             doRun = false;
+            service.shutdown();
         }
     }
 
@@ -50,11 +54,14 @@ public class OrderProcessor implements Runnable {
     
     @Override
     public void run() {
+        LOG.log(Level.INFO, "RUN !");
         if (itemProcessor == null || "".equals(itemProcessor.getName())) {
             LOG.log(Level.SEVERE, "Movie Processor has not been properly initialized.");
             return;
         }
-        while (doRun) {
+        if (!doRun) {
+            service.shutdown();
+        }else {
             IOrder currentOrder = null;
             try {
                 currentOrder = remainingOrders.poll();
