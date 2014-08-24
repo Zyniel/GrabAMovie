@@ -2,10 +2,10 @@ package grabamovie.server;
 
 import grabamovie.core.OrderProcessor;
 import grabamovie.core.FileCopyProcessor;
+import grabamovie.core.IOrderableProcessor;
 import grabamovie.utils.LogFormatter;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
@@ -21,32 +21,21 @@ import javax.servlet.annotation.WebListener;
 @WebListener()
 public class GAMContextServletListener implements ServletContextListener {
     private final Logger LOG = LogFormatter.getLogger(GAMContextServletListener.class.getName());
-    private ScheduledExecutorService service;
-    private OrderProcessor gam;
+    private ExecutorService service;
+    private IOrderableProcessor defaultProcessor;
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ServletContext ctx = sce.getServletContext();
         
         LOG.log(Level.INFO,"GAM Servlet Initialized");
-        
-        // Démarrer le processus
-        FileCopyProcessor hddprocessor;
         try {
             service = Executors.newSingleThreadScheduledExecutor();
-            //TODO: Insert loading processor and configuration from file
-            gam = new OrderProcessor(service);
+            defaultProcessor = new FileCopyProcessor("D:\\tmp3");
             
-            // Register OrderProcessor as Context attribute
-            service.scheduleAtFixedRate(gam, 0, 1000, TimeUnit.MILLISECONDS);
-             
-            hddprocessor = new FileCopyProcessor("D:\\tmp3");
-            gam.setItemProcessor(hddprocessor);
-            //gam.start();    
-            
-            // Register o
-            ctx.setAttribute("GAMEngine", gam);   
-            ctx.setAttribute("Service", service);
+            // Register 
+            ctx.setAttribute("ExecutorService", service);
+            ctx.setAttribute("DefaultProcessor", defaultProcessor);
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, "Could not initialize GAMEngine.", ex);
         }
@@ -55,12 +44,12 @@ public class GAMContextServletListener implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         ServletContext ctx = sce.getServletContext();
-        ctx.removeAttribute("GAMEngine");
-        ctx.removeAttribute("Service");
+        ctx.removeAttribute("ExecutorService");
+        ctx.removeAttribute("DefaultProcessor");
         
-        gam.stop();
+        LOG.log(Level.INFO, "Initializing shutdown...");
+        service.shutdown();
         service.shutdownNow();
-
         LOG.log(Level.INFO,"GAM Servlet Destroyed");
     } 
 }

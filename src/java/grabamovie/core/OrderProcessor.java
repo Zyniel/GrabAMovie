@@ -2,7 +2,6 @@ package grabamovie.core;
 
 import grabamovie.utils.LogFormatter;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,16 +11,13 @@ import java.util.logging.Logger;
  */
 public class OrderProcessor implements Runnable {
 
-    private LinkedBlockingQueue<IOrder> remainingOrders;
+    private IOrder order;
     private IOrderableProcessor itemProcessor;
-    private boolean doRun = false;
-    private Thread t;
-    private ScheduledExecutorService service;
     private static final Logger LOG = LogFormatter.getLogger(OrderProcessor.class.getName());
-    
-    public OrderProcessor(ScheduledExecutorService service) {
-        this.service = service;
-        remainingOrders = new LinkedBlockingQueue<IOrder>();
+
+    public OrderProcessor(IOrderableProcessor itemProcessor, IOrder order) {
+        this.order = order;
+        this.itemProcessor = itemProcessor;
     }
 
     public IOrderableProcessor getItemProcessor() {
@@ -31,51 +27,22 @@ public class OrderProcessor implements Runnable {
     public void setItemProcessor(IOrderableProcessor itemProcessor) {
         this.itemProcessor = itemProcessor;
     }
-    
-    public void addOrder(IOrder order) {
-        if (!remainingOrders.contains(order)) {
-            remainingOrders.add(order);
-        }
-    }
-    public void stop() {
-        if (doRun) {
-            doRun = false;
-            service.shutdown();
-        }
-    }
 
-    public void start() {
-        if (!doRun) {
-            doRun = true;
-            t = new Thread(this);
-            t.start();
-        }
-    }
-    
     @Override
     public void run() {
         LOG.log(Level.INFO, "RUN !");
         if (itemProcessor == null || "".equals(itemProcessor.getName())) {
-            LOG.log(Level.SEVERE, "Movie Processor has not been properly initialized.");
-            return;
-        }
-        if (!doRun) {
-            service.shutdown();
-        }else {
-            IOrder currentOrder = null;
+            LOG.log(Level.SEVERE, "Item Processor has not been properly initialized.");
+        } else {
             try {
-                currentOrder = remainingOrders.poll();
-                if (currentOrder != null) {
-                    LOG.log(Level.INFO, "Processing order: {0}", currentOrder.getId());
-                    currentOrder.process(itemProcessor);
-                    LOG.log(Level.INFO, "Ordered status: {0}", currentOrder.getStatus().getDescription());
+                if (order != null) {
+                    LOG.log(Level.INFO, "Processing order: {0}", order.getId());
+                    order.process(itemProcessor);
+                    LOG.log(Level.INFO, "Ordered status: {0}", order.getStatus().getDescription());
                 }
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, "An critical error occured in program.", ex);
             } catch (OrderProcessingException ex) {
                 LOG.log(Level.SEVERE, "An error occured while processing orders.", ex);
-                LOG.log(Level.INFO, "Ordered status: {0}", currentOrder.getStatus().getDescription());
+                LOG.log(Level.INFO, "Ordered status: {0}", order.getStatus().getDescription());
             }
         }
     }

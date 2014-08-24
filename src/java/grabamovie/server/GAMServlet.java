@@ -1,6 +1,7 @@
 package grabamovie.server;
 
 import grabamovie.core.IOrder;
+import grabamovie.core.IOrderableProcessor;
 import grabamovie.core.MovieOrder;
 import grabamovie.core.OrderProcessor;
 import grabamovie.core.Order;
@@ -8,6 +9,7 @@ import grabamovie.utils.LogFormatter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -24,6 +26,8 @@ import javax.xml.transform.stream.StreamSource;
 public class GAMServlet extends HttpServlet {
 
     private static final Logger LOG = LogFormatter.getLogger(GAMServlet.class.getName());
+    private ExecutorService es;
+    private IOrderableProcessor deftItemProcessor;
 
     /**
      * Processes requests for both HTTP
@@ -38,26 +42,31 @@ public class GAMServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
-        StringBuilder resp = new StringBuilder();
         PrintWriter out = response.getWriter();
+
+        if (es == null) {
+            es = (ExecutorService) getServletContext().getAttribute("ExecutorService");
+        }
+        if (deftItemProcessor == null) {
+            deftItemProcessor = (IOrderableProcessor) getServletContext().getAttribute("DefaultProcessor");
+        }
+
         try {
             // Get the order and try parsing
             String strOrder = request.getParameter("order");
             if (strOrder != null) {
                 try {
+                    // Prepare OrderProcessor
                     IOrder order = Order.parseXML(new StreamSource(new StringReader(strOrder)), MovieOrder.class);
-                    OrderProcessor gam;
-                    gam = (OrderProcessor) getServletContext().getAttribute("GAMEngine");
-                    gam.addOrder(order);
+                    OrderProcessor op = new OrderProcessor(deftItemProcessor, order);
                     
-                    resp.append(formatResponse(ResponseStatus.SUCCESS, null));
+                    // Queue processing
+                    es.execute(op);
                 } catch (JAXBException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
-                    resp.append(formatResponse(ResponseStatus.CRITICAL, ex.getMessage()));
+                    LOG.log(Level.SEVERE, "Could not parse order: {0}", ex.getLinkedException().getMessage());
                 }
             }
         } finally {
-            out.append(resp.toString());
             out.close();
         }
     }
@@ -104,6 +113,7 @@ public class GAMServlet extends HttpServlet {
     }// </editor-fold>
 
     private enum ResponseStatus {
+
         SUCCESS,
         FAILURE,
         CRITICAL
@@ -114,10 +124,15 @@ public class GAMServlet extends HttpServlet {
         sb.append("<response>");
         sb.append("<status>");
         switch (resp) {
-            case SUCCESS:   sb.append("0");;
-            case FAILURE:   sb.append("1");
-            case CRITICAL:  sb.append("2");
-            default:;
+            case SUCCESS:
+                sb.append("0");
+                ;
+            case FAILURE:
+                sb.append("1");
+            case CRITICAL:
+                sb.append("2");
+            default:
+                ;
         }
         sb.append("</status>");
         if (message == null || "".equals(message)) {
