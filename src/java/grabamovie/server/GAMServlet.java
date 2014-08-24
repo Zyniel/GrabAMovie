@@ -1,6 +1,8 @@
 package grabamovie.server;
 
-import grabamovie.core.GAMEngine;
+import grabamovie.core.IOrder;
+import grabamovie.core.MovieOrder;
+import grabamovie.core.OrderProcessor;
 import grabamovie.core.Order;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -35,24 +37,26 @@ public class GAMServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/xml;charset=UTF-8");
+        StringBuilder resp = new StringBuilder();
         PrintWriter out = response.getWriter();
         try {
             // Get the order and try parsing
             String strOrder = request.getParameter("order");
             if (strOrder != null) {
-                StringBuilder strB = new StringBuilder(strOrder);
                 try {
-                    Order order = Order.parseXML(new StreamSource(new StringReader(strB.toString())));
-                    GAMEngine gam = (GAMEngine) getServletContext().getAttribute("GAMEngine");
+                    IOrder order = Order.parseXML(new StreamSource(new StringReader(strOrder)), MovieOrder.class);
+                    OrderProcessor gam;
+                    gam = (OrderProcessor) getServletContext().getAttribute("GAMEngine");
                     gam.addOrder(order);
                     
-                    strB.append(formatResponse(ResponseStatus.SUCCESS, null));
+                    resp.append(formatResponse(ResponseStatus.SUCCESS, null));
                 } catch (JAXBException ex) {
                     LOG.log(Level.SEVERE, null, ex);
-                    strB.append(formatResponse(ResponseStatus.CRITICAL, ex.getMessage()));
+                    resp.append(formatResponse(ResponseStatus.CRITICAL, ex.getMessage()));
                 }
             }
         } finally {
+            out.append(resp.toString());
             out.close();
         }
     }

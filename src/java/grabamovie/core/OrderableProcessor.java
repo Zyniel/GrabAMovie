@@ -4,25 +4,29 @@ package grabamovie.core;
  *
  * @author OCanada
  */
-public abstract class MovieProcessor implements IMovieProcessor{
+public abstract class OrderableProcessor implements IOrderableProcessor{
     protected String processorName;
-    
+
+    public OrderableProcessor() {
+        processorName = this.getClass().getSimpleName();
+    }
+
     @Override
     /**
      * Processing routine with pre-processing, processing, post-processing and 
      * processing-error handling.
      */
-    public void process(Movie movie, Order order) throws Exception {
+    public void process(IOrderable item, IOrder order) throws Exception {
         try{
-            preProcess(movie, order);
-            internalProcess(movie, order);
-            postProcess(movie, order);            
+            preProcess(item, order);
+            internalProcess(item, order);
+            postProcess(item, order);            
         } catch (Exception e) {
-            errorProcess(movie, order, e);
+            errorProcess(item, order, e);
         }
     }
     
-    public String getProcessorName() {
+    public String getName() {
         return processorName;
     }
 
@@ -34,24 +38,24 @@ public abstract class MovieProcessor implements IMovieProcessor{
      * Main processing routine. Every action to handle movie should be done here.
      * @param movie Currently processed movie.
      */
-    protected abstract void internalProcess (Movie movie, Order order) throws Exception;
+    protected abstract void internalProcess (IOrderable item, IOrder order) throws Exception;
     
     /**
      * Main post-processing routine. 
      * @param movie Currently processed movie.
      */    
-    protected abstract void postProcess (Movie movie, Order order) throws Exception;
+    protected abstract void postProcess (IOrderable item, IOrder order) throws Exception;
     
     /**
      * Main post-processing routine.
      * @param movie Currently processed movie.
      */    
-    protected abstract void preProcess (Movie movie, Order order) throws Exception;
+    protected abstract void preProcess (IOrderable item, IOrder order) throws Exception;
     
     /**
      * Main error routine. Every action on error/exception should be done here.
      * @param movie Currently processed movie.
      */    
-    protected abstract void errorProcess (Movie movie, Order order, Exception e) throws Exception;
+    protected abstract void errorProcess (IOrderable item, IOrder order, Exception e) throws Exception;
 
 }

@@ -1,21 +1,21 @@
 package grabamovie.core;
 
-import static grabamovie.core.Order.MaxTries;
-import java.util.ArrayList;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.transform.Source;
+import org.eclipse.persistence.jaxb.MarshallerProperties;
 
 /**
  * Class representing a movie Order, identified by a technical Id. It is
@@ -24,63 +24,44 @@ import javax.xml.transform.Source;
  *
  * @author OCanada
  */
-@XmlRootElement(name = "order")
-@XmlAccessorType(XmlAccessType.NONE)
-public final class Order {
+@XmlTransient
+public abstract class Order implements IOrder, Comparable {
 
-    private static final Logger LOG = Logger.getLogger(Order.class.getName());
-    /**
-     * Maximum number of tries allowed to process an Order
-     */
-    protected static final int MaxTries = 1;
-    @XmlAttribute(name = "id")
+    protected static final Logger LOG = Logger.getLogger(Order.class.getName());
     /**
      * Order technical identifier
      */
-    private String id;
-    @XmlElement(name = "owner")
+    @XmlAttribute(name = "id")
+    protected String id;
     /**
      * Order optional owner name
      */
-    private String owner;
-    @XmlElement(name = "movie")
-    @XmlElementWrapper(name = "movies")
-    private List<Movie> movieList;
+    @XmlElement(name = "owner")
+    protected String owner;
+    @XmlElement(name = "item")
+    @XmlElementWrapper(name = "items")
+    @XmlAnyElement(lax=true)   
+    protected List<IOrderable> itemList;
     
-    private List<Movie> processedMovieList;
-    private List<Movie> unprocessedMovieList;
+    protected List<IOrderable> processedItemList;
+    protected List<IOrderable> unprocessedItemList;
     /**
      * Current order completion status
      */
-    private OrderStatus status;
-    /**
-     * Number of retries done for the current order
-     */
-    private int tries = 0;
+    protected OrderStatus status;
     /**
      * Number of errors during current try
      */
     private int errors = 0;
 
     /**
-     * States the progression of the order's preparation
-     */
-    public enum OrderStatus {
-
-        PREPARED,
-        PREPARED_PARTIAL,
-        CANCELLED,
-        RETRIABLE,
-        PROCESSING,
-        UNHANDLED
-    }
-
-    /**
      * Empty constructor for JAXB
      */
     public Order() {
         this.status = OrderStatus.UNHANDLED;
-        this.movieList = new ArrayList<Movie>();
+        //this.itemList = new ArrayList<IOrderable>();
+        //this.processedItemList = new ArrayList<IOrderable>();
+        //this.unprocessedItemList = new ArrayList<IOrderable>();
     }
 
     /**
@@ -91,7 +72,7 @@ public final class Order {
      * @param movieList List movies contained in the Order
      * @throws Exception Exceptions regarding Id
      */
-    public Order(String id, String owner, List<Movie> movieList) throws Exception {
+    public Order(String id, String owner, List<IOrderable> itemList) throws Exception {
         this();
         // Checks on ownername
         setId(id);
@@ -99,39 +80,42 @@ public final class Order {
         // No checks on ownername (Can be empty)
         this.owner = owner;
         // No checks on movie list (Can be empty)
-        this.movieList = movieList;
-    }
-
-    public String getId() {
-        return id;
+        this.itemList = itemList;
     }
 
     public String getOwner() {
-        return owner;
+        return this.owner;
     }
 
-    public List<Movie> getMovieList() {
-        return movieList;
+    @Override
+    public List<IOrderable> getItems() {
+        return this.itemList;
     }
 
+    @Override
     public OrderStatus getStatus() {
-        return status;
+        return this.status;
+    }
+    
+    @Override 
+    public String getId() {
+        return this.id;
     }
 
-    public void setId(String id) throws Exception {
-        if (id != null) {
+    public final void setId(String id) throws Exception {
+        //if (id != null) {
             this.id = id;
-        } else {
-            throw new Exception("Order Id is empty");
-        }
+        ////} else {
+        ////    throw new Exception("Order Id is empty");
+        ////}
     }
 
     public void setOwner(String owner) {
         this.owner = owner;
     }
 
-    public void setMovieList(List<Movie> movieList) {
-        this.movieList = movieList;
+    public void setItemList(List<IOrderable> itemList) {
+        this.itemList = itemList;
     }
 
     /**
@@ -141,46 +125,76 @@ public final class Order {
      * @return Order instance
      * @throws JAXBException
      */
-    public static Order parseXML(Source source) throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(Order.class);
+    public static IOrder parseXML(Source source, Class c) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(Order.class, MovieOrder.class, Orderable.class, Movie.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-        Order order = (Order) jaxbUnmarshaller.unmarshal(source);
+        IOrder order = (IOrder) jaxbUnmarshaller.unmarshal(source);
         return order;
     }
 
-    public void process(IMovieProcessor movieProcessor) throws OrderMaxTriesReachedException, OrderProcessingException {
-        boolean done = false;
-        do {
-            // Check Order Status
-            if (this.status == OrderStatus.CANCELLED) 
-                throw new OrderProcessingException("Cannot process order. Order has been cancelled.");
-            else if (this.status == OrderStatus.PREPARED || this.status == OrderStatus.PREPARED_PARTIAL) 
-                throw new OrderProcessingException("Cannot process order. Order has already been processed.");
-            
-            // Check Retries Status
-            if (++this.tries > MaxTries)
-                throw new OrderMaxTriesReachedException();
-            
-            errors = 0;
-            // Loop through all movies from the currentOrder
-            Iterator<Movie> iteMovies = movieList.iterator();
-            while (iteMovies.hasNext()) {
-                Movie currentMovie = (Movie) iteMovies.next();
-                try {
-                    movieProcessor.process(currentMovie, this);
-                    processedMovieList.add(currentMovie);
-                } catch (Exception e) {
-                    LOG.log(Level.SEVERE, "Error processing movie: " + currentMovie.getName(), e);
-                    unprocessedMovieList.add(currentMovie);
-                    errors++;
-                }
+    /**
+     * Parses and XML source into an Order instance
+     *
+     * @param source Source of the XML
+     * @return Order instance
+     * @throws JAXBException
+     */
+    public static IOrder parseJSON(Source source, Class c) throws JAXBException {
+        JAXBContext jaxbContext = JAXBContext.newInstance(Order.class, c);
+        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+        jaxbUnmarshaller.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");
+        jaxbUnmarshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
+        IOrder order = (IOrder) jaxbUnmarshaller.unmarshal(source);
+        return order;
+    }
+
+    public String toXML(Class c) throws JAXBException {
+        StringWriter sw = new StringWriter();
+        JAXBContext jaxbContext = JAXBContext.newInstance(c);
+        Marshaller jaxbmarshaller = jaxbContext.createMarshaller();
+        jaxbmarshaller.marshal(this, sw);
+        return sw.toString();
+    }    
+    
+    public String toJSON(Class c) throws JAXBException {
+        StringWriter sw = new StringWriter();
+        JAXBContext jaxbContext = JAXBContext.newInstance(c);
+        Marshaller jaxbmarshaller = jaxbContext.createMarshaller();
+        jaxbmarshaller.setProperty(MarshallerProperties.MEDIA_TYPE, "application/json");
+        jaxbmarshaller.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, false);
+        jaxbmarshaller.marshal(this, sw);
+        return (sw.toString());
+    }
+
+    @Override
+    public void process(IOrderableProcessor movieProcessor) throws OrderProcessingException {
+
+        // Check Order Status
+        if (this.status == OrderStatus.CANCELLED) {
+            throw new OrderProcessingException("Cannot process order. Order has been cancelled.");
+        } else if (this.status == OrderStatus.PREPARED || this.status == OrderStatus.PREPARED_PARTIAL) {
+            throw new OrderProcessingException("Cannot process order. Order has already been processed.");
+        }
+
+        errors = 0;
+        // Loop through all movies from the currentOrder
+        Iterator<IOrderable> iteItems = itemList.iterator();
+        while (iteItems.hasNext()) {
+            IOrderable item = (IOrderable) iteItems.next();
+            try {
+                movieProcessor.process(item, this);
+                processedItemList.add(item);
+            } catch (Exception e) {
+                LOG.log(Level.SEVERE, "Error processing item: " + item.getName(), e);
+                unprocessedItemList.add(item);
+                errors++;
             }
-            if (errors > 0) {
-                this.status = OrderStatus.PREPARED_PARTIAL;
-            } else {
-                this.status = OrderStatus.PREPARED;
-            }
-        } while (this.tries <= MaxTries);
+        }
+        if (errors > 0) {
+            this.status = OrderStatus.PREPARED_PARTIAL;
+        } else {
+            this.status = OrderStatus.PREPARED;
+        }
     }
 
     public boolean isCancelled() {
@@ -202,6 +216,9 @@ public final class Order {
     public boolean isPrepared() {
         return (this.status == OrderStatus.PREPARED || this.status == OrderStatus.PREPARED_PARTIAL);
     }
-    
-    
+
+    @Override
+    public int compareTo(Object o) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }

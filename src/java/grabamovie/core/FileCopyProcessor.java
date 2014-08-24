@@ -5,23 +5,24 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardCopyOption.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  *
  * @author OCanada
  */
-public final class HDDMovieProcessor extends MovieProcessor {
-    private static final Logger LOG = Logger.getLogger(HDDMovieProcessor.class.getName());
-    private GAMEngine gam;
+public final class FileCopyProcessor extends OrderableProcessor {
+    private static final Logger LOG = Logger.getLogger(FileCopyProcessor.class.getName());
+    private OrderProcessor gam;
     
     private String destination;
     
-    public HDDMovieProcessor() {
-        processorName = "HDDMovieProcessor";
+    public FileCopyProcessor() {
+        super();
     }
     
-    public HDDMovieProcessor(String destination) throws Exception {
+    public FileCopyProcessor(String destination) throws Exception {
         this();
         setDestination(destination);
         LOG.info("Initialized");
@@ -36,8 +37,9 @@ public final class HDDMovieProcessor extends MovieProcessor {
     }
     
     @Override
-    protected void internalProcess(Movie movie, Order order) throws Exception{
-        LOG.info("Copying file: " + movie.getName());
+    protected void internalProcess(IOrderable item, IOrder order) throws Exception{
+        Movie movie = (Movie) item;
+        LOG.log(Level.INFO, "Copying file: {0}", movie.getName());
         Path filepath = new File(movie.getLocation(), movie.getName()).toPath();
         Path destPath = new File(new File(this.destination.replace("\\", "\\\\"), order.getId()), movie.getName()).toPath();
         Files.copy(filepath, destPath, REPLACE_EXISTING);   
@@ -45,12 +47,12 @@ public final class HDDMovieProcessor extends MovieProcessor {
     }
 
     @Override
-    protected void postProcess(Movie movie, Order order) throws Exception{
+    protected void postProcess(IOrderable item, IOrder order) throws Exception{
         LOG.info("Post-processing");
     }
 
     @Override
-    protected void preProcess(Movie movie, Order order) throws Exception{
+    protected void preProcess(IOrderable item, IOrder order) throws Exception{
         try {
             Files.createDirectory(new File(this.destination.replace("\\", "\\\\"),order.getId()).toPath());
             LOG.info("Created Order Folder");
@@ -58,7 +60,7 @@ public final class HDDMovieProcessor extends MovieProcessor {
     }
 
     @Override
-    protected void errorProcess(Movie movie, Order order, Exception e) throws Exception{
+    protected void errorProcess(IOrderable item, IOrder order, Exception e) throws Exception{
         throw e;
     }
 }
