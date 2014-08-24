@@ -4,6 +4,7 @@ import grabamovie.core.IOrder;
 import grabamovie.core.MovieOrder;
 import grabamovie.core.OrderProcessor;
 import grabamovie.core.Order;
+import grabamovie.utils.LogFormatter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
@@ -22,7 +23,7 @@ import javax.xml.transform.stream.StreamSource;
  */
 public class GAMServlet extends HttpServlet {
 
-    private static final Logger LOG = Logger.getLogger(GAMServlet.class.getName());
+    private static final Logger LOG = LogFormatter.getLogger(GAMServlet.class.getName());
 
     /**
      * Processes requests for both HTTP

@@ -1,6 +1,8 @@
 package grabamovie.core;
 
+import grabamovie.utils.LogFormatter;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,7 +29,7 @@ import org.eclipse.persistence.jaxb.MarshallerProperties;
 @XmlTransient
 public abstract class Order implements IOrder, Comparable {
 
-    protected static final Logger LOG = Logger.getLogger(Order.class.getName());
+    protected static final Logger LOG = LogFormatter.getLogger(Order.class.getName());
     /**
      * Order technical identifier
      */
@@ -38,6 +40,7 @@ public abstract class Order implements IOrder, Comparable {
      */
     @XmlElement(name = "owner")
     protected String owner;
+    
     @XmlElement(name = "item")
     @XmlElementWrapper(name = "items")
     @XmlAnyElement(lax=true)   
@@ -59,9 +62,8 @@ public abstract class Order implements IOrder, Comparable {
      */
     public Order() {
         this.status = OrderStatus.UNHANDLED;
-        //this.itemList = new ArrayList<IOrderable>();
-        //this.processedItemList = new ArrayList<IOrderable>();
-        //this.unprocessedItemList = new ArrayList<IOrderable>();
+        this.processedItemList = new ArrayList<IOrderable>();
+        this.unprocessedItemList = new ArrayList<IOrderable>();
     }
 
     /**

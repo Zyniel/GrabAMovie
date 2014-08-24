@@ -4,6 +4,7 @@
  */
 package grabamovie.core;
 
+import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlTransient;
@@ -12,7 +13,6 @@ import javax.xml.bind.annotation.XmlTransient;
  *
  * @author OCanada
  */
-@XmlTransient
 public abstract class Orderable implements IOrderable {
     @XmlAttribute (name="id")
     private String id;

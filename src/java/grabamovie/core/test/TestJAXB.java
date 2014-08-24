@@ -50,7 +50,7 @@ public class TestJAXB {
             
             jaxbMarshaller.marshal(order, new File("d:\\tmp3\\order.xml"));
         } catch (Exception ex) {
-            Logger.getLogger(TestJAXB.class.getName()).log(Level.SEVERE, null, ex);
+            LogFormatter.getLogger(TestJAXB.class.getName()).log(Level.SEVERE, null, ex);
         }
         * */
     }

@@ -9,7 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
  *
  * @author OCanada
  */
-@XmlRootElement(name = "movie")
+@XmlRootElement(name = "item")
 @XmlAccessorType (XmlAccessType.NONE)
 public class Movie extends Orderable{
     @XmlElement (name="location")

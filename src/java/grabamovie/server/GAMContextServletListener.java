@@ -2,6 +2,7 @@ package grabamovie.server;
 
 import grabamovie.core.OrderProcessor;
 import grabamovie.core.FileCopyProcessor;
+import grabamovie.utils.LogFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
@@ -16,7 +17,7 @@ import javax.servlet.annotation.WebListener;
  */
 @WebListener()
 public class GAMContextServletListener implements ServletContextListener {
-    private static final Logger LOG = Logger.getLogger(GAMContextServletListener.class.getName());
+    private static final Logger LOG = LogFormatter.getLogger(GAMContextServletListener.class.getName());
     private OrderProcessor gam; 
     
     @Override
@@ -31,6 +32,7 @@ public class GAMContextServletListener implements ServletContextListener {
             //TODO: Insert loading processor and configuration from file
             gam = new OrderProcessor();
             hddprocessor = new FileCopyProcessor("D:\\tmp3");
+            gam.setItemProcessor(hddprocessor);
             gam.start();    
             
             // Register OrderProcessor as Context attribute

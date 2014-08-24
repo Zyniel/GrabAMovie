@@ -1,5 +1,6 @@
 package grabamovie.server;
 
+import grabamovie.utils.LogFormatter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContextAttributeEvent;
@@ -8,7 +9,7 @@ import javax.servlet.annotation.WebListener;
 
 @WebListener
 public class GAMContextAttributeListener implements ServletContextAttributeListener {
-    private static final Logger LOG = Logger.getLogger(GAMContextServletListener.class.getName());
+    private static final Logger LOG = LogFormatter.getLogger(GAMContextServletListener.class.getName());
     
     @Override
     public void attributeAdded(ServletContextAttributeEvent servletContextAttributeEvent) {

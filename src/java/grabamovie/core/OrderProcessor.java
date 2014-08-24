@@ -1,5 +1,6 @@
 package grabamovie.core;
 
+import grabamovie.utils.LogFormatter;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,7 +15,7 @@ public class OrderProcessor implements Runnable {
     private IOrderableProcessor itemProcessor;
     private boolean doRun = false;
     private Thread t;
-    private static final Logger LOG = Logger.getLogger(OrderProcessor.class.getName());
+    private static final Logger LOG = LogFormatter.getLogger(OrderProcessor.class.getName());
 
     public OrderProcessor() {
         remainingOrders = new LinkedBlockingQueue<IOrder>();
@@ -59,9 +60,12 @@ public class OrderProcessor implements Runnable {
                 currentOrder = remainingOrders.poll();
                 if (currentOrder != null) {
                     LOG.log(Level.INFO, "Processing order: {0}", currentOrder.getId());
+                    currentOrder.process(itemProcessor);
                 }
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
+                LOG.log(Level.SEVERE, "An critical error occured in program.", ex);
+            } catch (OrderProcessingException ex) {
                 LOG.log(Level.SEVERE, "An error occured while processing orders.", ex);
             }
         }

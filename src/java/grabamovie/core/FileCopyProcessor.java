@@ -1,5 +1,6 @@
 package grabamovie.core;
 
+import grabamovie.utils.LogFormatter;
 import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -13,7 +14,7 @@ import java.util.logging.Logger;
  * @author OCanada
  */
 public final class FileCopyProcessor extends OrderableProcessor {
-    private static final Logger LOG = Logger.getLogger(FileCopyProcessor.class.getName());
+    private static final Logger LOG = LogFormatter.getLogger(FileCopyProcessor.class.getName());
     private OrderProcessor gam;
     
     private String destination;
@@ -61,6 +62,6 @@ public final class FileCopyProcessor extends OrderableProcessor {
 
     @Override
     protected void errorProcess(IOrderable item, IOrder order, Exception e) throws Exception{
-        throw e;
+        LOG.severe(e.getMessage());
     }
 }

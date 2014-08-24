@@ -16,8 +16,6 @@ import org.eclipse.persistence.oxm.annotations.XmlDiscriminatorNode;
  */
 @XmlRootElement(name = "order")
 @XmlAccessorType(XmlAccessType.NONE)
-@XmlSeeAlso({MovieOrder.class})
-@XmlDiscriminatorNode("@type")
 public class MovieOrder extends Order {  
     /**
      * Empty constructor for JAXB
