@@ -1,6 +1,8 @@
 package grabamovie.core;
 
+import grabamovie.utils.AbstractSubject;
 import grabamovie.utils.LogFormatter;
+import grabamovie.utils.Observer;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,7 +29,7 @@ import org.eclipse.persistence.jaxb.MarshallerProperties;
  * @author OCanada
  */
 @XmlTransient
-public abstract class Order implements IOrder, Comparable {
+public abstract class Order extends AbstractSubject implements IOrder, Comparable {
 
     protected static final Logger LOG = LogFormatter.getLogger(Order.class.getName());
     /**
@@ -169,7 +171,7 @@ public abstract class Order implements IOrder, Comparable {
     }
 
     @Override
-    public void process(IOrderableProcessor movieProcessor) throws OrderProcessingException {
+    public void process(IOrderableProcessor itemProcessor) throws OrderProcessingException {
 
         // Check Order Status
         if (this.status == OrderStatus.CANCELLED) {
@@ -184,7 +186,7 @@ public abstract class Order implements IOrder, Comparable {
         while (iteItems.hasNext()) {
             IOrderable item = (IOrderable) iteItems.next();
             try {
-                movieProcessor.process(item, this);
+                itemProcessor.process(item, this);
                 processedItemList.add(item);
             } catch (Exception e) {
                 LOG.log(Level.SEVERE, "Error processing item: " + item.getName(), e);
@@ -219,4 +221,10 @@ public abstract class Order implements IOrder, Comparable {
     public int compareTo(Object o) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+    @Override
+    public Object getUpdate(Observer obj){
+        return this.getStatus();
+    } 
+    
 }

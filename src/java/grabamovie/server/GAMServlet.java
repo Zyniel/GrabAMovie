@@ -58,7 +58,8 @@ public class GAMServlet extends HttpServlet {
                 try {
                     // Prepare OrderProcessor
                     IOrder order = Order.parseXML(new StreamSource(new StringReader(strOrder)), MovieOrder.class);
-                    OrderProcessor op = new OrderProcessor(deftItemProcessor, order);
+                    OrderProcessor op = new OrderProcessor(deftItemProcessor);
+                    op.addOrder(order);
                     
                     // Queue processing
                     es.execute(op);

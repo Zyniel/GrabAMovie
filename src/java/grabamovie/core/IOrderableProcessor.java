@@ -1,10 +1,12 @@
 package grabamovie.core;
 
+import grabamovie.utils.Subject;
+
 /**
  *
  * @author OCanada
  */
-public interface IOrderableProcessor {
+public interface IOrderableProcessor extends Subject{
     
     public String getName();
     

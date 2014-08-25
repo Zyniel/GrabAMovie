@@ -12,4 +12,8 @@ public interface IOrderable {
     
     public String getName();
     
+    public OrderableProcessStatus getStatus();
+    
+    public void setStatus(OrderableProcessStatus status);
+    
 }

@@ -1,6 +1,7 @@
 package grabamovie.core;
 
 import grabamovie.utils.LogFormatter;
+import grabamovie.utils.Observer;
 import java.io.File;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
@@ -21,17 +22,18 @@ public final class FileCopyProcessor extends OrderableProcessor {
     
     public FileCopyProcessor() {
         super();
+        LOG.info("Initialized");
     }
     
     public FileCopyProcessor(String destination) throws Exception {
         this();
         setDestination(destination);
-        LOG.info("Initialized");
     }
 
     public void setDestination(String destination) throws Exception {
         if (destination != null) {
             this.destination = destination;
+            LOG.log(Level.INFO, "Copy destination: {0}", destination);
         } else {
             throw new Exception("Movie Processor physical destination can not be empty.");
         }
@@ -64,4 +66,9 @@ public final class FileCopyProcessor extends OrderableProcessor {
     protected void errorProcess(IOrderable item, IOrder order, Exception e) throws Exception{
         LOG.severe(e.getMessage());
     }
+    
+    @Override
+    public Object getUpdate(Observer obj) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }    
 }

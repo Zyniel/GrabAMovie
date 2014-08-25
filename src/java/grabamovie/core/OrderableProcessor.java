@@ -1,13 +1,16 @@
 package grabamovie.core;
 
+import grabamovie.utils.AbstractSubject;
+
 /**
  *
  * @author OCanada
  */
-public abstract class OrderableProcessor implements IOrderableProcessor{
+public abstract class OrderableProcessor extends AbstractSubject implements IOrderableProcessor{
     protected String processorName;
 
     public OrderableProcessor() {
+        super();
         processorName = this.getClass().getSimpleName();
     }
 
@@ -20,12 +23,20 @@ public abstract class OrderableProcessor implements IOrderableProcessor{
         try{
             preProcess(item, order);
             internalProcess(item, order);
-            postProcess(item, order);            
+            postProcess(item, order);
+            
+            // Success and notification
+            item.setStatus(OrderableProcessStatus.SUCCEEDED);
+            notifyObservers(item);
         } catch (Exception e) {
+            // Failure and notification
+            item.setStatus(OrderableProcessStatus.FAILED);
+            notifyObservers(e);
             errorProcess(item, order, e);
         }
     }
     
+    @Override
     public String getName() {
         return processorName;
     }

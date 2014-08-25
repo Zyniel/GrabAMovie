@@ -15,4 +15,6 @@ public interface Observer {
 
     //attach with subject to observe
     public void setSubject(Subject sub);
+
+    public void update(Object msg);
 }

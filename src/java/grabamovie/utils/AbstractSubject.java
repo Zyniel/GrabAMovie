@@ -41,7 +41,7 @@ public abstract class AbstractSubject implements Subject {
     }
 
     @Override
-    public void notifyObservers() {
+    public void notifyObservers(Object msg) {
         List<Observer> observersLocal = null;
         //synchronization is used to make sure any observer registered after message is received is not notified
         synchronized (MUTEX) {
@@ -52,10 +52,11 @@ public abstract class AbstractSubject implements Subject {
             this.changed = false;
         }
         for (Observer obj : observersLocal) {
-            obj.update();
+            obj.update(msg);
         }
 
     }
 
+    @Override
     public abstract Object getUpdate(Observer obj);
 }

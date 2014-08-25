@@ -4,10 +4,8 @@
  */
 package grabamovie.core;
 
-import javax.xml.bind.annotation.XmlAnyElement;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 
 /**
  *
@@ -19,19 +17,20 @@ public abstract class Orderable implements IOrderable {
     @XmlElement (name="name")
     private String name;
     
-    public Orderable () {}
+    private OrderableProcessStatus status;
+    
+    public Orderable () {
+        this.status = OrderableProcessStatus.PENDING;
+    }
     
     public Orderable (String id, String name) {
+        this();
         this.id = id;
         this.name = name;
     }
     
     public String getId() {
         return this.id;
-    }
-    
-    public String getName(){
-        return this.name;
     }
     
     public void setId(String id) {
@@ -41,5 +40,20 @@ public abstract class Orderable implements IOrderable {
     public void setName(String name) {
         this.name = name;
     }    
+    
+    @Override
+    public String getName(){
+        return this.name;
+    }    
+    
+    @Override
+    public OrderableProcessStatus getStatus(){
+        return this.status;
+    }
+    
+    @Override
+    public void setStatus(OrderableProcessStatus status){
+        this.status = status;
+    } 
     
 }
